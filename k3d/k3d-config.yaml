@@ -1,0 +1,20 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+image: rancher/k3s:v1.32.1-k3s1
+servers: 1
+agents: 1
+kubeAPI:
+  hostPort: "6550"
+ports:
+  - port: 9080:80
+    nodeFilters:
+      - loadbalancer
+  - port: 944:443
+    nodeFilters:
+      - loadbalancer
+options:
+  k3s:
+    extraArgs:
+      - arg: "--disable=traefik@server:*"
+        nodeFilters:
+          - server:0
