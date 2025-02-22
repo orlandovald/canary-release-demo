@@ -26,7 +26,7 @@ install-prometheus:
 	@echo "\033[33mInstalling Prometheus ===\033[0m"
 	helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 	helm repo update
-	helm upgrade -i -n prometheus --create-namespace prometheus prometheus-community/prometheus
+	helm upgrade -i -n prometheus --create-namespace prometheus prometheus-community/prometheus --set server.global.scrape_interval=10s
 
 .PHONY: install-argo
 install-argo:
