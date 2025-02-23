@@ -3,19 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 )
 
-var version string
+var (
+	version   string
+	errorRate string
+	rate      int
+)
 
 func main() {
-	// Get version from environment variable
-	version = os.Getenv("APP_VERSION")
-	if version == "" {
-		version = "dev"
-	}
-
 	handler := http.NewServeMux()
 	handler.HandleFunc("/ready", readyHandler)
 	handler.HandleFunc("/version", versionHandler)
@@ -25,11 +26,18 @@ func main() {
 		port = "8080"
 	}
 
+	var err error
+	rate, err = strconv.Atoi(errorRate)
+	if err != nil {
+		log.Fatalf("Error parsing error rate: %v", err)
+	}
+
 	fmt.Printf("Starting server on port %s...\n", port)
 	http.ListenAndServe(":"+port, handler)
 }
 
 func versionHandler(w http.ResponseWriter, r *http.Request) {
+	status := http.StatusOK
 	accept := r.Header.Get("Accept")
 	if accept == "text/html" {
 		w.Header().Set("Content-Type", "text/html")
@@ -39,13 +47,24 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Default to JSON response
 	w.Header().Set("Content-Type", "application/json")
+
+	if shouldError() {
+		status = http.StatusInternalServerError
+	}
+	w.WriteHeader(status)
 	response := map[string]string{"version": version}
 	json.NewEncoder(w).Encode(response)
 }
 
+// readyHandler is a simple handler for K8s readiness probe
 func readyHandler(w http.ResponseWriter, _ *http.Request) {
 	fmt.Println("Ready!")
 	fmt.Fprint(w, "Ready!")
+}
+
+func shouldError() bool {
+	r := rand.Intn(100) + 1
+	return rate >= r
 }
 
 // const staticDir = "./static"

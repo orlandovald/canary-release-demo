@@ -13,8 +13,11 @@ COPY . .
 ARG TARGETARCH
 ENV GOARCH=$TARGETARCH
 
+ARG ERROR_RATE=0
+ARG APP_VERSION=dev
+
 # Build the binary with optimization flags
-RUN go build -ldflags "-s -w" -o server
+RUN go build -ldflags="-s -w -X 'main.version=${APP_VERSION}' -X 'main.errorRate=${ERROR_RATE}'" -o server
 
 # Final image
 FROM --platform=$TARGETPLATFORM scratch

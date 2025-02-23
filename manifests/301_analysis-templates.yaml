@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: error-rate
+spec:
+  args:
+    - name: threshold
+      value: "5"
+  metrics:
+    - name: error-rate
+      interval: 20s
+      failureCondition: len(result) > 0 && result[0] >= {{ args.threshold }}
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-server.prometheus.svc.cluster.local:80
+          query: >-
+            sum(irate(istio_requests_total{reporter="source",destination_service_name="canary-svc",response_code!~"5.*"}[2m])) 
+            / sum(irate(istio_requests_total{reporter="source",destination_service_name=~"canary-svc"}[2m]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: rpm
+spec:
+  args:
+    - name: threshold
+      value: "100"
+  metrics:
+    - name: rpm
+      interval: 20s
+      count: 2
+      successCondition: len(result) > 0 && result[0] >= {{ args.threshold }}
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus-server.prometheus.svc.cluster.local:80
+          query: |
+            60 * sum(rate(istio_requests_total{destination_workload="canary-demo"}[1m]))

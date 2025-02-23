@@ -9,9 +9,9 @@ ports:
   - port: 9080:80
     nodeFilters:
       - loadbalancer
-  - port: 944:443
-    nodeFilters:
-      - loadbalancer
+  # - port: 944:443
+  #   nodeFilters:
+  #     - loadbalancer
 options:
   k3s:
     extraArgs:
