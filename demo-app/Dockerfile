@@ -24,6 +24,7 @@ FROM --platform=$TARGETPLATFORM scratch
 
 # Copy the compiled binary
 COPY --from=builder /app/server /server
+COPY static /app/static
 
 # Copy SSL certificates for HTTPS support
 # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

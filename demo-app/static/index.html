@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canary Demo</title>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.js"
+      integrity="sha384-oeUn82QNXPuVkGCkcrInrS1twIxKhkZiFfr2TdiuObZ3n3yIeMiqcRzkIcguaof1"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(10, 30px);
+        grid-template-rows: repeat(10, 30px);
+        gap: 10px; /* 10px margin between squares */
+        background-color: #ddd;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .square {
+        width: 30px;
+        height: 30px;
+        border: 1px solid black; /* Default border */
+      }
+
+      /* Color classes */
+      .orange {
+        background-color: orange;
+      }
+      .blue {
+        background-color: blue;
+      }
+      .green {
+        background-color: green;
+      }
+      .yellow {
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Canary Demo</h1>
+    <div class="grid">
+      <!-- JavaScript will populate the grid dynamically -->
+    </div>
+
+    <script>
+      const grid = document.querySelector(".grid");
+      const colors = ["orange", "blue", "green", "yellow"];
+
+      for (let i = 0; i < 100; i++) {
+        const square = document.createElement("div");
+        square.classList.add("square");
+        square.setAttribute("hx-get", "hit");
+
+        delay = Math.floor(Math.random() * 6500) + 500;
+        square.setAttribute("hx-trigger", "every " + delay + "ms");
+        square.innerHTML =
+          '<div class="square" style="background-color: gray">&nbsp;</div>';
+
+        // Assign a random background color
+        square.classList.add(colors[Math.floor(Math.random() * colors.length)]);
+
+        grid.appendChild(square);
+      }
+      htmx.process(grid);
+    </script>
+  </body>
+
+  <script>
+    // We still want to swap elements on error
+    document.body.addEventListener("htmx:beforeOnLoad", function (evt) {
+      if (evt.detail.xhr.status === 500) {
+        evt.detail.shouldSwap = true;
+        evt.detail.isError = false;
+      }
+    });
+  </script>
+</html>

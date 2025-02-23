@@ -10,50 +10,60 @@ import (
 	"strconv"
 )
 
+const (
+	staticDir        = "./static"
+	responseTemplate = `<div class='square lined %s' style='background-color: %s'>&nbsp;</div>`
+)
+
 var (
-	version   string
-	errorRate string
+	version   string = "orange"
+	errorRate string = "0"
 	rate      int
 )
 
+type response struct {
+	Version   string `json:"version"`
+	ErrorRate int    `json:"error_rate"`
+}
+
 func main() {
-	handler := http.NewServeMux()
-	handler.HandleFunc("/ready", readyHandler)
-	handler.HandleFunc("/version", versionHandler)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	var err error
 	rate, err = strconv.Atoi(errorRate)
 	if err != nil {
 		log.Fatalf("Error parsing error rate: %v", err)
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	handler := http.NewServeMux()
+	handler.HandleFunc("/ready", readyHandler)
+	handler.HandleFunc("/version", versionHandler)
+	handler.HandleFunc("/hit", hitHandler)
+	handler.Handle("/", http.FileServer(http.Dir(staticDir)))
+
 	fmt.Printf("Starting server on port %s...\n", port)
 	http.ListenAndServe(":"+port, handler)
 }
 
-func versionHandler(w http.ResponseWriter, r *http.Request) {
+func hitHandler(w http.ResponseWriter, r *http.Request) {
+	lineType := "ok"
 	status := http.StatusOK
-	accept := r.Header.Get("Accept")
-	if accept == "text/html" {
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprintf(w, "<html><body><h1>Version: %s</h1></body></html>", version)
-		return
-	}
-
-	// Default to JSON response
-	w.Header().Set("Content-Type", "application/json")
-
 	if shouldError() {
+		lineType = "error"
 		status = http.StatusInternalServerError
 	}
+
+	html := fmt.Sprintf(responseTemplate, lineType, version)
 	w.WriteHeader(status)
-	response := map[string]string{"version": version}
-	json.NewEncoder(w).Encode(response)
+	fmt.Fprint(w, html)
+}
+
+func versionHandler(w http.ResponseWriter, r *http.Request) {
+	resp := response{Version: version, ErrorRate: rate}
+	json.NewEncoder(w).Encode(resp)
 }
 
 // readyHandler is a simple handler for K8s readiness probe
@@ -66,37 +76,3 @@ func shouldError() bool {
 	r := rand.Intn(100) + 1
 	return rate >= r
 }
-
-// const staticDir = "./static"
-//
-// var emoticons = []string{
-// 	"emoticon1.png",
-// 	"emoticon2.png",
-// 	"emoticon3.png",
-// 	"emoticon4.png",
-// }
-//
-// type EmoticonResponse struct {
-// 	URL string `json:"url"`
-// }
-//
-// func getEmoticonHandler(w http.ResponseWriter, r *http.Request) {
-// 	randomIndex := rand.Intn(len(emoticons))
-// 	response := EmoticonResponse{URL: emoticons[randomIndex]}
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(response)
-// }
-//
-// func main() {
-// 	http.HandleFunc("/get_emoticon", getEmoticonHandler)
-//
-// 	// Serve static files
-// 	fs := http.FileServer(http.Dir(staticDir))
-// 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-//
-// 	port := ":8080"
-// 	println("Server is running on port", port)
-// 	if err := http.ListenAndServe(port, nil); err != nil {
-// 		println("Failed to start server:", err)
-// 	}
-// }
