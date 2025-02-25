@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: orlandovald/canary-demo-app:v1
+          image: canary-demo-app:green
           ports:
             - name: http
               containerPort: 8080

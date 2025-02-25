@@ -23,11 +23,8 @@ RUN go build -ldflags="-s -w -X 'main.version=${APP_VERSION}' -X 'main.errorRate
 FROM --platform=$TARGETPLATFORM scratch
 
 # Copy the compiled binary
-COPY --from=builder /app/server /server
-COPY static /app/static
-
-# Copy SSL certificates for HTTPS support
-# COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder app/server /server
+COPY static /static
 
 EXPOSE 8080
 

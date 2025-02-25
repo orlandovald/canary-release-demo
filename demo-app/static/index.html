@@ -28,8 +28,8 @@
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(10, 30px);
-        grid-template-rows: repeat(10, 30px);
+        grid-template-columns: repeat({{.Count}}, {{.SquareLength}}px);
+        grid-template-rows: repeat({{.Count}}, {{.SquareLength}}px);
         gap: 10px; /* 10px margin between squares */
         background-color: #ddd;
         padding: 10px;
@@ -37,23 +37,19 @@
       }
 
       .square {
-        width: 30px;
-        height: 30px;
+        width: {{.SquareLength}}px;
+        height: {{.SquareLength}}px;
         border: 1px solid black; /* Default border */
       }
 
-      /* Color classes */
-      .orange {
-        background-color: orange;
+      div.lined.error {
+          color: #ff0000;
+          border: solid 2px #ff0000;
       }
-      .blue {
-        background-color: blue;
-      }
-      .green {
-        background-color: green;
-      }
-      .yellow {
-        background-color: yellow;
+
+      .htmx-swapping {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
       }
     </style>
   </head>
@@ -62,12 +58,12 @@
     <div class="grid">
       <!-- JavaScript will populate the grid dynamically -->
     </div>
-
+    <h3>https://canary.orlandovaldez.com</h3>
     <script>
       const grid = document.querySelector(".grid");
       const colors = ["orange", "blue", "green", "yellow"];
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < {{.Total}}; i++) {
         const square = document.createElement("div");
         square.classList.add("square");
         square.setAttribute("hx-get", "hit");
@@ -77,11 +73,9 @@
         square.innerHTML =
           '<div class="square" style="background-color: gray">&nbsp;</div>';
 
-        // Assign a random background color
-        square.classList.add(colors[Math.floor(Math.random() * colors.length)]);
-
         grid.appendChild(square);
       }
+      htmx.config.globalViewTransitions = true;
       htmx.process(grid);
     </script>
   </body>

@@ -36,8 +36,12 @@ install-argo:
 
 .PHONY: build-demo-app
 build-demo-app:
-	cd demo-app && docker buildx build -t canary-demo:latest .
+	cd demo-app && docker build . -t canary-demo-app:green --build-arg APP_VERSION=green 
+	cd demo-app && docker build . -t canary-demo-app:blue --build-arg APP_VERSION=blue 
+	cd demo-app && docker build . -t canary-demo-app:yellow --build-arg APP_VERSION=yellow --build-arg ERROR_RATE=30 
 
 .PHONY: cluster-import-image
 cluster-import-image:
-	k3d images import canary-demo:latest --cluster $(CLUSTER_NAME)
+	k3d images import canary-demo-app:green --cluster $(CLUSTER_NAME)
+	k3d images import canary-demo-app:blue --cluster $(CLUSTER_NAME)
+	k3d images import canary-demo-app:yellow --cluster $(CLUSTER_NAME)
