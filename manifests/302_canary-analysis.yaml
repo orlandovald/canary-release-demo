@@ -4,6 +4,8 @@ metadata:
   name: canary-demo
   labels:
     app: canary-demo
+  annotations:
+    notifications.argoproj.io/subscribe.slack: "argo-rollouts-notifications"
 spec:
   replicas: 3
   revisionHistoryLimit: 3

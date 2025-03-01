@@ -257,6 +257,7 @@ data:
           }]
   trigger.on-analysis-run-error: |
     - send: [analysis-run-error]
+      when: rollout.status.availableReplicas > 0
   trigger.on-analysis-run-failed: |
     - send: [analysis-run-failed]
   trigger.on-analysis-run-running: |
