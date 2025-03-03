@@ -16,8 +16,8 @@ spec:
           address: http://prometheus-server.prometheus.svc.cluster.local:80
           query: >-
             100 * (
-            sum(irate(istio_requests_total{reporter="source",destination_service_name="canary-svc",response_code!~"5.*"}[2m])) 
-            / sum(irate(istio_requests_total{reporter="source",destination_service_name=~"canary-svc"}[2m]))
+            sum(irate(istio_requests_total{reporter="source",destination_service_name="canary-svc",response_code=~"5.*"}[2m])) 
+            / sum(irate(istio_requests_total{reporter="source",destination_service_name="canary-svc"}[2m]))
             )
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -38,4 +38,4 @@ spec:
         prometheus:
           address: http://prometheus-server.prometheus.svc.cluster.local:80
           query: |
-            60 * sum(rate(istio_requests_total{destination_workload="canary-demo"}[1m]))
+            60 * sum(rate(istio_requests_total{destination_workload="canary-demo"}[2m]))
